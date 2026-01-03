@@ -1134,13 +1134,104 @@ const Insights = () => {
   );
 };
 
+const CommunityRoom = () => {
+  const { moodId } = useParams();
+  const { user } = useAuth();
+  const [echoes, setEchoes] = useState([]);
+  const [input, setInput] = useState('');
+  const navigate = useNavigate();
+
+  const moodDetails = {
+    'calm': { name: 'Sea of Calm', icon: <Waves size={40} />, color: '#C0C0C0' },
+    'void': { name: 'The Void', icon: <Moon size={40} />, color: '#444' },
+    'hope': { name: 'Fires of Hope', icon: <Flame size={40} />, color: '#888' },
+    'woods': { name: 'Whispering Woods', icon: <Trees size={40} />, color: '#666' }
+  };
+
+  const currentMood = moodDetails[moodId] || moodDetails['calm'];
+
+  useEffect(() => {
+    const q = query(
+      collection(db, "community_echoes"),
+      where("moodId", "==", moodId),
+      orderBy("timestamp", "desc")
+    );
+    return onSnapshot(q, (s) => {
+      setEchoes(s.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+  }, [moodId]);
+
+  const postEcho = async () => {
+    if (!input.trim() || !user) return;
+    await addDoc(collection(db, "community_echoes"), {
+      moodId,
+      content: input,
+      timestamp: serverTimestamp(),
+      nickname: user.displayName || 'Anonymous'
+    });
+    setInput('');
+  };
+
+  return (
+    <div style={{ paddingTop: '150px', minHeight: '100vh', padding: '0 20px 100px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <button onClick={() => navigate('/community')} className="glass-button" style={{ marginBottom: '30px', fontSize: '11px' }}>← Back to Collective</button>
+
+        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', border: '1px solid var(--glass-border)' }}>
+            {currentMood.icon}
+          </div>
+          <h1 className="silver-text-gradient" style={{ fontSize: '36px' }}>{currentMood.name}</h1>
+          <p style={{ color: 'var(--silver-muted)', marginTop: '10px' }}>شارك خواطرك في هذا التردد مع الآخرين</p>
+        </div>
+
+        <div className="glass-card" style={{ padding: '30px', marginBottom: '40px' }}>
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="اترك أثراً هنا بجملة قصيرة..."
+            style={{ width: '100%', background: 'transparent', border: 'none', color: '#fff', fontSize: '18px', outline: 'none', resize: 'none', height: '80px', textAlign: 'center' }}
+          />
+          <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '20px', display: 'flex', justifyContent: 'center' }}>
+            <button className="premium-action-btn" onClick={postEcho}><Send size={16} /> أطلق صدى كلماتك</button>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <AnimatePresence>
+            {echoes.map((echo, i) => (
+              <motion.div
+                key={echo.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="glass-card"
+                style={{ padding: '25px', position: 'relative', overflow: 'hidden' }}
+              >
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: currentMood.color }}></div>
+                <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '15px' }}>"{echo.content}"</p>
+                <div style={{ fontSize: '11px', color: 'var(--silver-muted)', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>نفسٌ تقول: {echo.nickname}</span>
+                  <span>{echo.timestamp?.toDate().toLocaleTimeString()}</span>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CommunityHub = () => {
   const moods = [
-    { name: 'Sea of Calm', icon: <Waves size={32} />, color: 'var(--accent-silver)', count: 12, desc: 'Quiet reflection and deep peace.' },
-    { name: 'The Void', icon: <Moon size={32} />, color: '#444', count: 45, desc: 'Embracing the silence of the unknown.' },
-    { name: 'Fires of Hope', icon: <Flame size={32} />, color: '#888', count: 8, desc: 'Reigniting the light within.' },
-    { name: 'Whispering Woods', icon: <Trees size={32} />, color: '#666', count: 21, desc: 'Gentle support and collective growth.' }
+    { id: 'calm', name: 'Sea of Calm', icon: <Waves size={32} />, color: '#C0C0C0', count: 12, desc: 'الهدوء الداخلي والسكينة العميقة.' },
+    { id: 'void', name: 'The Void', icon: <Moon size={32} />, color: '#444', count: 45, desc: 'احتضان الصمت وما لا نعرفه.' },
+    { id: 'hope', name: 'Fires of Hope', icon: <Flame size={32} />, color: '#888', count: 8, desc: 'إعادة إشعال شعلة الأمل بداخلك.' },
+    { id: 'woods', name: 'Whispering Woods', icon: <Trees size={32} />, color: '#666', count: 21, desc: 'دعم هادئ ونمو جماعي.' }
   ];
+
+  const navigate = useNavigate();
 
   return (
     <div style={{ paddingTop: '120px', minHeight: '100vh', paddingBottom: '100px', width: '100%', padding: '120px 20px 60px' }}>
@@ -1151,7 +1242,7 @@ const CommunityHub = () => {
       >
         <h2 className="silver-text-gradient" style={{ fontSize: 'clamp(32px, 8vw, 48px)', fontWeight: '900', letterSpacing: '-1px' }}>Collective Resonance</h2>
         <p style={{ color: 'var(--silver-muted)', maxWidth: '600px', margin: '20px auto 0', fontSize: 'clamp(14px, 4vw, 18px)', lineHeight: '1.6' }}>
-          Join localized emotional frequencies in the silent collective.
+          انضم إلى الترددات الشعورية في مجتمع أثير الصامت.
         </p>
       </motion.div>
 
@@ -1171,11 +1262,7 @@ const CommunityHub = () => {
             transition={{ delay: idx * 0.1 }}
             className="premium-glass-card"
             style={{ padding: '50px 40px', textAlign: 'center', cursor: 'pointer' }}
-            onClick={() => {
-              if (m.name === 'Sea of Calm') navigate('/stats');
-              else if (m.name === 'The Void') navigate('/journal');
-              else navigate('/speak');
-            }}
+            onClick={() => navigate(`/community/${m.id}`)}
           >
             <div className="card-icon-sphere" style={{ background: `radial-gradient(circle at 30% 30%, ${m.color}66, transparent)` }}>
               {m.icon}
@@ -1309,6 +1396,7 @@ function AppContent({ isBanned, setIsBanned, banTimeRemaining, setBanTimeRemaini
         <Route path="/rate" element={<RateAndReward />} />
         <Route path="/journal" element={user ? <Journal /> : <Navigate to="/auth" />} />
         <Route path="/community" element={<CommunityHub />} />
+        <Route path="/community/:moodId" element={user ? <CommunityRoom /> : <Navigate to="/auth" />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/stats" element={<Insights />} />
         <Route path="/listen" element={<ListenerHub />} />
