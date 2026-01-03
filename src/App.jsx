@@ -298,7 +298,7 @@ const LandingPage = () => {
 const SpeakerAI = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "أهلاً بك في فضاء أثير.. أنا هنا لأسمعك. قولي إيه اللي شاغل بالك دلوقتي؟" }
+    { role: 'assistant', content: "Welcome to Aether's quiet space. I am here to listen. What's on your mind today?" }
   ]);
   const [loading, setLoading] = useState(false);
   const [matching, setMatching] = useState(false);
@@ -765,16 +765,16 @@ const Journal = () => {
       console.error("AI logic error:", e);
     }
 
-    // Local Arabic Fallback Logic (Always runs if AI fails or times out)
+    // English Fallback Logic
     const lowercaseEntry = entry.toLowerCase();
-    let fallbackResponse = "أنا أسمعك وأشعر بصدق كلماتك. هذه المساحة لك لتفرغ ما بداخلك بكل أمان.";
+    let fallbackResponse = "I hear you. This space is yours to reflect in absolute safety.";
 
-    if (lowercaseEntry.includes('حزن') || lowercaseEntry.includes('متضايق') || lowercaseEntry.includes('تعبان') || lowercaseEntry.includes('مخنو')) {
-      fallbackResponse = "أنا حاسس بيك.. الحمل اللي على قلبك تقيل بس أنت أقوى منه، والفضفضة هي أول طريق الراحة.";
-    } else if (lowercaseEntry.includes('فرح') || lowercaseEntry.includes('سعيد') || lowercaseEntry.includes('الحمد لله') || lowercaseEntry.includes('مبسوط')) {
-      fallbackResponse = "يا رب دايما تكون مبسوط! طاقتك الحلوة دي بتنور المكان هنا.";
-    } else if (lowercaseEntry.includes('خائف') || lowercaseEntry.includes('قلق') || lowercaseEntry.includes('توتر') || lowercaseEntry.includes('خايف')) {
-      fallbackResponse = "خد نفس عميق.. مفيش حاجة تستاهل كل القلق ده، أنت هنا في أمان ومحدش هيحكم عليك.";
+    if (lowercaseEntry.includes('sad') || lowercaseEntry.includes('heavy') || lowercaseEntry.includes('pain')) {
+      fallbackResponse = "I can feel the depth of your words. Sharing them here is the first step towards peace.";
+    } else if (lowercaseEntry.includes('happy') || lowercaseEntry.includes('joy') || lowercaseEntry.includes('great')) {
+      fallbackResponse = "Your positive energy is a beacon in the Aether. Keep shining.";
+    } else if (lowercaseEntry.includes('scared') || lowercaseEntry.includes('anxious') || lowercaseEntry.includes('fear')) {
+      fallbackResponse = "Take a deep breath. You are in a safe haven where no one judges your frequencies.";
     }
 
     setRephrased(`AI Reflection: ${fallbackResponse}`);
@@ -1057,10 +1057,10 @@ const Insights = () => {
       if (entries.length > 0) {
         // Simple heuristic sentiment analysis
         const keywords = {
-          calm: ['quiet', 'peace', 'calm', 'relax', 'still', 'هدوء', 'سكينة', 'راحة', 'مسالم', 'صمت', 'رايق', 'صافي'],
-          joy: ['happy', 'love', 'content', 'great', 'smile', 'سعيد', 'فرح', 'حب', 'جميل', 'مبسوط', 'فرحان', 'عاش'],
-          sorrow: ['sad', 'pain', 'heavy', 'cry', 'dark', 'حزن', 'ألم', 'تعب', 'ضيق', 'موجوع', 'مدايق', 'مخنوق', 'قرفان', 'زعلان'],
-          hope: ['future', 'bright', 'forward', 'better', 'try', 'أمل', 'بكرة', 'هحاول', 'تغيير', 'نور', 'نقدر', 'خلاص']
+          calm: ['quiet', 'peace', 'calm', 'relax', 'still', 'serene', 'tranquil'],
+          joy: ['happy', 'love', 'content', 'great', 'smile', 'bliss', 'delight'],
+          sorrow: ['sad', 'pain', 'heavy', 'cry', 'dark', 'grief', 'lonely'],
+          hope: ['future', 'bright', 'forward', 'better', 'try', 'trust', 'light']
         };
 
         const counts = { calm: 0, joy: 0, sorrow: 0, hope: 0 };
@@ -1182,18 +1182,18 @@ const CommunityRoom = () => {
             {currentMood.icon}
           </div>
           <h1 className="silver-text-gradient" style={{ fontSize: '36px' }}>{currentMood.name}</h1>
-          <p style={{ color: 'var(--silver-muted)', marginTop: '10px' }}>شارك خواطرك في هذا التردد مع الآخرين</p>
+          <p style={{ color: 'var(--silver-muted)', marginTop: '10px' }}>Share your echoes in this frequency with others.</p>
         </div>
 
         <div className="glass-card" style={{ padding: '30px', marginBottom: '40px' }}>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="اترك أثراً هنا بجملة قصيرة..."
+            placeholder="Leave an echo here with a short thought..."
             style={{ width: '100%', background: 'transparent', border: 'none', color: '#fff', fontSize: '18px', outline: 'none', resize: 'none', height: '80px', textAlign: 'center' }}
           />
           <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '20px', display: 'flex', justifyContent: 'center' }}>
-            <button className="premium-action-btn" onClick={postEcho}><Send size={16} /> أطلق صدى كلماتك</button>
+            <button className="premium-action-btn" onClick={postEcho}><Send size={16} /> Release your Echo</button>
           </div>
         </div>
 
@@ -1211,7 +1211,7 @@ const CommunityRoom = () => {
                 <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: currentMood.color }}></div>
                 <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '15px' }}>"{echo.content}"</p>
                 <div style={{ fontSize: '11px', color: 'var(--silver-muted)', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>نفسٌ تقول: {echo.nickname}</span>
+                  <span>A soul says: {echo.nickname}</span>
                   <span>{echo.timestamp?.toDate().toLocaleTimeString()}</span>
                 </div>
               </motion.div>
@@ -1225,10 +1225,10 @@ const CommunityRoom = () => {
 
 const CommunityHub = () => {
   const moods = [
-    { id: 'calm', name: 'Sea of Calm', icon: <Waves size={32} />, color: '#C0C0C0', count: 12, desc: 'الهدوء الداخلي والسكينة العميقة.' },
-    { id: 'void', name: 'The Void', icon: <Moon size={32} />, color: '#444', count: 45, desc: 'احتضان الصمت وما لا نعرفه.' },
-    { id: 'hope', name: 'Fires of Hope', icon: <Flame size={32} />, color: '#888', count: 8, desc: 'إعادة إشعال شعلة الأمل بداخلك.' },
-    { id: 'woods', name: 'Whispering Woods', icon: <Trees size={32} />, color: '#666', count: 21, desc: 'دعم هادئ ونمو جماعي.' }
+    { id: 'calm', name: 'Sea of Calm', icon: <Waves size={32} />, color: '#C0C0C0', count: 12, desc: 'Quiet reflection and deep inner peace.' },
+    { id: 'void', name: 'The Void', icon: <Moon size={32} />, color: '#444', count: 45, desc: 'Embracing the silence of the unknown.' },
+    { id: 'hope', name: 'Fires of Hope', icon: <Flame size={32} />, color: '#888', count: 8, desc: 'Reigniting the fire of hope within.' },
+    { id: 'woods', name: 'Whispering Woods', icon: <Trees size={32} />, color: '#666', count: 21, desc: 'Gentle support and collective growth.' }
   ];
 
   const navigate = useNavigate();
@@ -1242,7 +1242,7 @@ const CommunityHub = () => {
       >
         <h2 className="silver-text-gradient" style={{ fontSize: 'clamp(32px, 8vw, 48px)', fontWeight: '900', letterSpacing: '-1px' }}>Collective Resonance</h2>
         <p style={{ color: 'var(--silver-muted)', maxWidth: '600px', margin: '20px auto 0', fontSize: 'clamp(14px, 4vw, 18px)', lineHeight: '1.6' }}>
-          انضم إلى الترددات الشعورية في مجتمع أثير الصامت.
+          Join emotional frequencies in the silent collective.
         </p>
       </motion.div>
 
