@@ -298,13 +298,14 @@ const LandingPage = () => {
 const SpeakerAI = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Welcome to Aether's quiet space. What's on your mind today? Tell me a bit, and I'll find a real person who truly understands." }
+    { role: 'assistant', content: "أهلاً بك في فضاء أثير.. أنا هنا لأسمعك. قولي إيه اللي شاغل بالك دلوقتي؟" }
   ]);
   const [loading, setLoading] = useState(false);
   const [matching, setMatching] = useState(false);
   const [warning, setWarning] = useState('');
   const [emergencyModal, setEmergencyModal] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth(); // FIX: Added missing useAuth hook to prevent crash
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -331,9 +332,12 @@ const SpeakerAI = () => {
     setLoading(true);
 
     setTimeout(async () => {
-      let aiResponse = "End-to-End Encrypted: Your heartbeat has been sensed. I'm finding a companion who listens without judgment...";
+      let aiResponse = "تم تشفير كلماتك.. أنا ببحث لك دلوقتي عن شخص حقيقي يقدر يسمعك ويفهمك بجد.";
 
-      const realAI = await fetchGemini(`A user on Aether (a private sanctuary) said: "${userInput}". Give a very brief (1 sentence), deeply empathetic, and poetic response acknowledging their pain and telling them you are searching for a soul to listen to them. Keep it mysterious and comforting.`);
+      const realAI = await fetchGemini(`You are Aether AI, a supportive listener for an Egyptian user. They said: "${userInput}". 
+      Respond in Egyptian Arabic (Ammiya). Be deeply empathetic, poetic, and acknowledge their feelings. 
+      Tell them you are finding a real soul to listen to them. Keep it mysterious yet very comforting. 
+      IMPORTANT: Respond in 1 brief sentence.`);
       if (realAI) aiResponse = realAI;
 
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
