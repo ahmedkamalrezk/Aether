@@ -84,16 +84,23 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 const fetchGemini = async (prompt) => {
   if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-    return null; // Fallback to mock
+    return null;
   }
+
+  // Add a timeout to prevent hanging forever
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 seconds timeout
+
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]
-      })
+      }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
     const data = await response.json();
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
@@ -639,8 +646,9 @@ const Auth = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    // For Aether's anonymous feel, we use username@aether.local
-    const email = `${formData.username}@aether.local`;
+    // Clean username to prevent invalid email errors (remove spaces and special chars)
+    const cleanUsername = formData.username.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+    const email = `${cleanUsername}@aether.local`;
     try {
       if (isRegistering) {
         const userCred = await register(email, formData.password);
