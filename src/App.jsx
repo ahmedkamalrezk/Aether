@@ -1140,83 +1140,147 @@ const CommunityRoom = () => {
   const [echoes, setEchoes] = useState([]);
   const [input, setInput] = useState('');
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
 
-  const moodDetails = {
-    'calm': { name: 'Sea of Calm', icon: <Waves size={40} />, color: '#C0C0C0' },
-    'void': { name: 'The Void', icon: <Moon size={40} />, color: '#444' },
-    'hope': { name: 'Fires of Hope', icon: <Flame size={40} />, color: '#888' },
-    'woods': { name: 'Whispering Woods', icon: <Trees size={40} />, color: '#666' }
-  };
+  const moods = [
+    { id: 'calm', name: 'Sea of Calm', icon: <Waves size={20} />, color: '#C0C0C0' },
+    { id: 'void', name: 'The Void', icon: <Moon size={20} />, color: '#444444' },
+    { id: 'hope', name: 'Fires of Hope', icon: <Flame size={20} />, color: '#888888' },
+    { id: 'woods', name: 'Whispering Woods', icon: <Trees size={20} />, color: '#666666' }
+  ];
 
-  const currentMood = moodDetails[moodId] || moodDetails['calm'];
+  const currentMood = moods.find(m => m.id === moodId) || moods[0];
 
   useEffect(() => {
     const q = query(
       collection(db, "community_echoes"),
       where("moodId", "==", moodId),
-      orderBy("timestamp", "desc")
+      orderBy("timestamp", "asc")
     );
-    return onSnapshot(q, (s) => {
+    const unsubscribe = onSnapshot(q, (s) => {
       setEchoes(s.docs.map(d => ({ id: d.id, ...d.data() })));
     });
+    return () => unsubscribe();
   }, [moodId]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [echoes]);
 
   const postEcho = async () => {
     if (!input.trim() || !user) return;
+    const text = input;
+    setInput('');
     await addDoc(collection(db, "community_echoes"), {
       moodId,
-      content: input,
+      content: text,
       timestamp: serverTimestamp(),
-      nickname: user.displayName || 'Anonymous'
+      nickname: user.displayName || 'Seeker'
     });
-    setInput('');
   };
 
   return (
-    <div style={{ paddingTop: '150px', minHeight: '100vh', padding: '0 20px 100px' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <button onClick={() => navigate('/community')} className="glass-button" style={{ marginBottom: '30px', fontSize: '11px' }}>← Back to Collective</button>
-
-        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', border: '1px solid var(--glass-border)' }}>
-            {currentMood.icon}
+    <div style={{ display: 'flex', height: '100vh', background: '#050505', overflow: 'hidden' }}>
+      {/* Sidebar: Discord Style */}
+      <div className="desktop-only" style={{ width: '280px', background: 'rgba(255,255,255,0.01)', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', paddingTop: '80px' }}>
+        <div style={{ padding: '20px 25px', marginBottom: '10px' }}>
+          <h3 style={{ fontSize: '11px', color: 'var(--silver-muted)', letterSpacing: '2.5px', textTransform: 'uppercase', fontWeight: '800' }}>Collective Spaces</h3>
+        </div>
+        <div style={{ flexGrow: 1, padding: '0 12px' }}>
+          {moods.map(m => (
+            <div
+              key={m.id}
+              onClick={() => navigate(`/community/${m.id}`)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 18px', borderRadius: '10px',
+                cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)', marginBottom: '4px',
+                background: moodId === m.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                color: moodId === m.id ? '#fff' : 'var(--silver-muted)',
+                boxShadow: moodId === m.id ? '0 4px 15px rgba(0,0,0,0.2)' : 'none'
+              }}
+              className="room-item"
+            >
+              <span style={{ color: m.color, opacity: moodId === m.id ? 1 : 0.5 }}>{m.icon}</span>
+              <span style={{ fontSize: '13.5px', fontWeight: moodId === m.id ? '600' : '400' }}>{m.name}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.03)', background: 'rgba(0,0,0,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '600', fontSize: '14px' }}>
+              {user?.displayName?.[0] || 'S'}
+            </div>
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontSize: '13px', fontWeight: '700', color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{user?.displayName || 'Seeker'}</div>
+              <div style={{ fontSize: '10px', color: 'var(--silver-muted)', letterSpacing: '0.5px' }}>FREQUENCY: STABLE</div>
+            </div>
           </div>
-          <h1 className="silver-text-gradient" style={{ fontSize: '36px' }}>{currentMood.name}</h1>
-          <p style={{ color: 'var(--silver-muted)', marginTop: '10px' }}>Share your echoes in this frequency with others.</p>
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', position: 'relative', paddingTop: '80px' }}>
+        {/* Chat Header */}
+        <div style={{ height: '64px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', padding: '0 30px', justifyContent: 'space-between', background: 'rgba(5,5,5,0.7)', backdropFilter: 'blur(30px)', zIndex: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <span style={{ color: currentMood.color }}>{currentMood.icon}</span>
+            <h2 style={{ fontSize: '16px', fontWeight: '700', letterSpacing: '0.5px' }}>{currentMood.name}</h2>
+          </div>
+          <button onClick={() => navigate('/community')} className="mobile-only glass-button" style={{ fontSize: '10px', padding: '6px 14px' }}>Browse Spaces</button>
         </div>
 
-        <div className="glass-card" style={{ padding: '30px', marginBottom: '40px' }}>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Leave an echo here with a short thought..."
-            style={{ width: '100%', background: 'transparent', border: 'none', color: '#fff', fontSize: '18px', outline: 'none', resize: 'none', height: '80px', textAlign: 'center' }}
-          />
-          <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '20px', display: 'flex', justifyContent: 'center' }}>
-            <button className="premium-action-btn" onClick={postEcho}><Send size={16} /> Release your Echo</button>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <AnimatePresence>
-            {echoes.map((echo, i) => (
+        {/* Messages List */}
+        <div
+          ref={scrollRef}
+          style={{ flexGrow: 1, overflowY: 'auto', padding: '30px', display: 'flex', flexDirection: 'column', gap: '24px', scrollBehavior: 'smooth' }}
+        >
+          {echoes.length === 0 ? (
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
+              <Sparkles size={48} style={{ marginBottom: '20px' }} />
+              <p style={{ fontSize: '14px', letterSpacing: '1px' }}>Wavelength is quiet. Start the resonance...</p>
+            </div>
+          ) : (
+            echoes.map((echo, i) => (
               <motion.div
                 key={echo.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="glass-card"
-                style={{ padding: '25px', position: 'relative', overflow: 'hidden' }}
+                style={{ display: 'flex', gap: '16px' }}
               >
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: currentMood.color }}></div>
-                <p style={{ fontSize: '16px', lineHeight: '1.6', marginBottom: '15px' }}>"{echo.content}"</p>
-                <div style={{ fontSize: '11px', color: 'var(--silver-muted)', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>A soul says: {echo.nickname}</span>
-                  <span>{echo.timestamp?.toDate().toLocaleTimeString()}</span>
+                <div style={{ minWidth: '42px', height: '42px', borderRadius: '14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--silver-muted)', fontSize: '16px', fontWeight: '600' }}>
+                  {echo.nickname?.[0] || 'S'}
+                </div>
+                <div style={{ flexGrow: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px' }}>
+                    <span style={{ fontWeight: '700', fontSize: '14px', color: '#fff' }}>{echo.nickname}</span>
+                    <span style={{ fontSize: '10px', color: 'var(--silver-muted)', fontWeight: '500' }}>{echo.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                  <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.85)', lineHeight: '1.6', whiteSpace: 'pre-wrap', maxWidth: '900px' }}>{echo.content}</p>
                 </div>
               </motion.div>
-            ))}
-          </AnimatePresence>
+            ))
+          )}
+        </div>
+
+        {/* Input Area */}
+        <div style={{ padding: '0 30px 30px' }}>
+          <div className="glass-card" style={{ padding: '4px 6px 4px 20px', borderRadius: '18px', display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(255,255,255,0.03)', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && postEcho()}
+              placeholder={`Message in #${currentMood.name.toLowerCase().replace(/\s+/g, '-')}`}
+              style={{ flexGrow: 1, background: 'transparent', border: 'none', color: '#fff', outline: 'none', fontSize: '14px', height: '48px' }}
+            />
+            <button
+              onClick={postEcho}
+              style={{ width: '40px', height: '40px', borderRadius: '14px', background: input.trim() ? '#fff' : 'transparent', border: 'none', color: input.trim() ? '#000' : 'var(--silver-muted)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Send size={18} />
+            </button>
+          </div>
         </div>
       </div>
     </div>
