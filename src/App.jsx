@@ -1048,10 +1048,10 @@ const Insights = () => {
       if (entries.length > 0) {
         // Simple heuristic sentiment analysis
         const keywords = {
-          calm: ['quiet', 'peace', 'calm', 'relax', 'still', 'هدوء', 'سكينة', 'راحة', 'مسالم', 'صمت'],
-          joy: ['happy', 'love', 'content', 'great', 'smile', 'سعيد', 'فرح', 'حب', 'جميل', 'مبسوط'],
-          sorrow: ['sad', 'pain', 'heavy', 'cry', 'dark', 'حزن', 'ألم', 'تعب', 'ضيق', 'موجوع'],
-          hope: ['future', 'bright', 'forward', 'better', 'try', 'أمل', 'بكرة', 'هحاول', 'تغيير', 'نور']
+          calm: ['quiet', 'peace', 'calm', 'relax', 'still', 'هدوء', 'سكينة', 'راحة', 'مسالم', 'صمت', 'رايق', 'صافي'],
+          joy: ['happy', 'love', 'content', 'great', 'smile', 'سعيد', 'فرح', 'حب', 'جميل', 'مبسوط', 'فرحان', 'عاش'],
+          sorrow: ['sad', 'pain', 'heavy', 'cry', 'dark', 'حزن', 'ألم', 'تعب', 'ضيق', 'موجوع', 'مدايق', 'مخنوق', 'قرفان', 'زعلان'],
+          hope: ['future', 'bright', 'forward', 'better', 'try', 'أمل', 'بكرة', 'هحاول', 'تغيير', 'نور', 'نقدر', 'خلاص']
         };
 
         const counts = { calm: 0, joy: 0, sorrow: 0, hope: 0 };
