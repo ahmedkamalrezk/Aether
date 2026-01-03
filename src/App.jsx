@@ -1224,14 +1224,25 @@ const CommunityRoom = () => {
 };
 
 const CommunityHub = () => {
+  const [counts, setCounts] = useState({ calm: 0, void: 0, hope: 0, woods: 0 });
+  const navigate = useNavigate();
+
   const moods = [
-    { id: 'calm', name: 'Sea of Calm', icon: <Waves size={32} />, color: '#C0C0C0', count: 12, desc: 'Quiet reflection and deep inner peace.' },
-    { id: 'void', name: 'The Void', icon: <Moon size={32} />, color: '#444', count: 45, desc: 'Embracing the silence of the unknown.' },
-    { id: 'hope', name: 'Fires of Hope', icon: <Flame size={32} />, color: '#888', count: 8, desc: 'Reigniting the fire of hope within.' },
-    { id: 'woods', name: 'Whispering Woods', icon: <Trees size={32} />, color: '#666', count: 21, desc: 'Gentle support and collective growth.' }
+    { id: 'calm', name: 'Sea of Calm', icon: <Waves size={32} />, color: '#C0C0C0', desc: 'Quiet reflection and deep inner peace.' },
+    { id: 'void', name: 'The Void', icon: <Moon size={32} />, color: '#444', desc: 'Embracing the silence of the unknown.' },
+    { id: 'hope', name: 'Fires of Hope', icon: <Flame size={32} />, color: '#888', desc: 'Reigniting the fire of hope within.' },
+    { id: 'woods', name: 'Whispering Woods', icon: <Trees size={32} />, color: '#666', desc: 'Gentle support and collective growth.' }
   ];
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    const unsubs = moods.map(mood => {
+      const q = query(collection(db, "community_echoes"), where("moodId", "==", mood.id));
+      return onSnapshot(q, (snapshot) => {
+        setCounts(prev => ({ ...prev, [mood.id]: snapshot.size }));
+      });
+    });
+    return () => unsubs.forEach(unsub => unsub());
+  }, []);
 
   return (
     <div style={{ paddingTop: '120px', minHeight: '100vh', paddingBottom: '100px', width: '100%', padding: '120px 20px 60px' }}>
@@ -1270,7 +1281,7 @@ const CommunityHub = () => {
             <h3 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '15px' }}>{m.name}</h3>
             <p style={{ fontSize: '14px', color: 'var(--silver-muted)', marginBottom: '25px', lineHeight: '1.5' }}>{m.desc}</p>
             <div style={{ padding: '10px 20px', borderRadius: '50px', background: 'rgba(255,255,255,0.03)', display: 'inline-block', fontSize: '12px', fontWeight: 'bold', color: 'var(--accent-silver)' }}>
-              {m.count} SOULS BREATHE HERE
+              {counts[m.id] || 0} SOULS BREATHE HERE
             </div>
           </motion.div>
         ))}
