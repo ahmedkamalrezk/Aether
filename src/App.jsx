@@ -83,13 +83,13 @@ const useAuth = () => useContext(AuthContext);
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 const fetchGemini = async (prompt) => {
-  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 20) {
+    console.warn("AI Key invalid or missing");
     return null;
   }
 
-  // Add a timeout to prevent hanging forever
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 seconds timeout
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // Strict 5s timeout
 
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -102,9 +102,9 @@ const fetchGemini = async (prompt) => {
     });
     clearTimeout(timeoutId);
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("AI connection failed:", error.name === 'AbortError' ? 'Timeout' : error);
     return null;
   }
 };
@@ -334,11 +334,16 @@ const SpeakerAI = () => {
     setTimeout(async () => {
       let aiResponse = "تم تشفير كلماتك.. أنا ببحث لك دلوقتي عن شخص حقيقي يقدر يسمعك ويفهمك بجد.";
 
-      const realAI = await fetchGemini(`You are Aether AI, a supportive listener for an Egyptian user. They said: "${userInput}". 
-      Respond in Egyptian Arabic (Ammiya). Be deeply empathetic, poetic, and acknowledge their feelings. 
-      Tell them you are finding a real soul to listen to them. Keep it mysterious yet very comforting. 
-      IMPORTANT: Respond in 1 brief sentence.`);
-      if (realAI) aiResponse = realAI;
+      try {
+        const realAI = await fetchGemini(`You are Aether AI, a supportive listener for an Egyptian user. They said: "${userInput}". 
+        Respond in Egyptian Arabic (Ammiya). Be deeply empathetic, poetic, and acknowledge their feelings. 
+        Tell them you are finding a real soul to listen to them. Keep it mysterious yet very comforting. 
+        IMPORTANT: Respond in 1 brief sentence.`);
+        if (realAI) aiResponse = realAI;
+      } catch (e) {
+        console.error("SpeakerAI Gemini call failed:", e);
+        // Fallback to default message if AI fails
+      }
 
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
       setLoading(false);
@@ -750,25 +755,29 @@ const Journal = () => {
     Acknowledge their feelings with extreme empathy and rephrase it in a way that makes them feel heard, validated, and poetic. 
     Start with "AI Reflection:". Keep it meaningful and supportive.`;
 
-    const result = await fetchGemini(prompt);
-
-    if (result) {
-      setRephrased(result);
-    } else {
-      // Local Arabic Fallback Logic
-      const lowercaseEntry = entry.toLowerCase();
-      let fallbackResponse = "أنا أسمعك وأشعر بصدق كلماتك. هذه المساحة لك لتفرغ ما بداخلك بكل أمان.";
-
-      if (lowercaseEntry.includes('حزن') || lowercaseEntry.includes('متضايق') || lowercaseEntry.includes('تعبان')) {
-        fallbackResponse = "أرى أنك تحمل حملاً ثقيلاً في قلبك الآن. لا بأس بأن تشعر بهذا الثقل، فأنت لست وحيداً في هذا الشعور.";
-      } else if (lowercaseEntry.includes('فرح') || lowercaseEntry.includes('سعيد') || lowercaseEntry.includes('الحمد لله')) {
-        fallbackResponse = "جميل أن نرى هذا النور في كلماتك الراقية. شاركنا هذا الصفاء ليعم السكون في الأثير.";
-      } else if (lowercaseEntry.includes('خائف') || lowercaseEntry.includes('قلق') || lowercaseEntry.includes('توتر')) {
-        fallbackResponse = "خذ نفساً عميقاً... كلماتك هنا في أمان، وسنجد معاً طريقاً للسكينة والهدوء.";
+    try {
+      const result = await fetchGemini(prompt);
+      if (result) {
+        setRephrased(result);
+        return;
       }
-
-      setRephrased(`AI Reflection: ${fallbackResponse}`);
+    } catch (e) {
+      console.error("AI logic error:", e);
     }
+
+    // Local Arabic Fallback Logic (Always runs if AI fails or times out)
+    const lowercaseEntry = entry.toLowerCase();
+    let fallbackResponse = "أنا أسمعك وأشعر بصدق كلماتك. هذه المساحة لك لتفرغ ما بداخلك بكل أمان.";
+
+    if (lowercaseEntry.includes('حزن') || lowercaseEntry.includes('متضايق') || lowercaseEntry.includes('تعبان') || lowercaseEntry.includes('مخنو')) {
+      fallbackResponse = "أنا حاسس بيك.. الحمل اللي على قلبك تقيل بس أنت أقوى منه، والفضفضة هي أول طريق الراحة.";
+    } else if (lowercaseEntry.includes('فرح') || lowercaseEntry.includes('سعيد') || lowercaseEntry.includes('الحمد لله') || lowercaseEntry.includes('مبسوط')) {
+      fallbackResponse = "يا رب دايما تكون مبسوط! طاقتك الحلوة دي بتنور المكان هنا.";
+    } else if (lowercaseEntry.includes('خائف') || lowercaseEntry.includes('قلق') || lowercaseEntry.includes('توتر') || lowercaseEntry.includes('خايف')) {
+      fallbackResponse = "خد نفس عميق.. مفيش حاجة تستاهل كل القلق ده، أنت هنا في أمان ومحدش هيحكم عليك.";
+    }
+
+    setRephrased(`AI Reflection: ${fallbackResponse}`);
   };
 
   return (
