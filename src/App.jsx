@@ -747,10 +747,23 @@ const Journal = () => {
     Start with "AI Reflection:". Keep it meaningful and supportive.`;
 
     const result = await fetchGemini(prompt);
+
     if (result) {
       setRephrased(result);
     } else {
-      setRephrased(`AI Processing: "I hear that you are going through a heavy moment, but you are choosing to witness your feelings instead of being consumed by them..."`);
+      // Local Arabic Fallback Logic
+      const lowercaseEntry = entry.toLowerCase();
+      let fallbackResponse = "أنا أسمعك وأشعر بصدق كلماتك. هذه المساحة لك لتفرغ ما بداخلك بكل أمان.";
+
+      if (lowercaseEntry.includes('حزن') || lowercaseEntry.includes('متضايق') || lowercaseEntry.includes('تعبان')) {
+        fallbackResponse = "أرى أنك تحمل حملاً ثقيلاً في قلبك الآن. لا بأس بأن تشعر بهذا الثقل، فأنت لست وحيداً في هذا الشعور.";
+      } else if (lowercaseEntry.includes('فرح') || lowercaseEntry.includes('سعيد') || lowercaseEntry.includes('الحمد لله')) {
+        fallbackResponse = "جميل أن نرى هذا النور في كلماتك الراقية. شاركنا هذا الصفاء ليعم السكون في الأثير.";
+      } else if (lowercaseEntry.includes('خائف') || lowercaseEntry.includes('قلق') || lowercaseEntry.includes('توتر')) {
+        fallbackResponse = "خذ نفساً عميقاً... كلماتك هنا في أمان، وسنجد معاً طريقاً للسكينة والهدوء.";
+      }
+
+      setRephrased(`AI Reflection: ${fallbackResponse}`);
     }
   };
 
@@ -1031,13 +1044,13 @@ const Insights = () => {
       if (entries.length > 0) {
         // Simple heuristic sentiment analysis
         const keywords = {
-          calm: ['quiet', 'peace', 'calm', 'relax', 'still'],
-          joy: ['happy', 'love', 'content', 'great', 'smile'],
-          sorrow: ['sad', 'pain', 'heavy', 'cry', 'dark'],
-          hope: ['future', 'bright', 'forward', 'better', 'try']
+          calm: ['quiet', 'peace', 'calm', 'relax', 'still', 'هدوء', 'سكينة', 'راحة', 'مسالم', 'صمت'],
+          joy: ['happy', 'love', 'content', 'great', 'smile', 'سعيد', 'فرح', 'حب', 'جميل', 'مبسوط'],
+          sorrow: ['sad', 'pain', 'heavy', 'cry', 'dark', 'حزن', 'ألم', 'تعب', 'ضيق', 'موجوع'],
+          hope: ['future', 'bright', 'forward', 'better', 'try', 'أمل', 'بكرة', 'هحاول', 'تغيير', 'نور']
         };
 
-        const counts = { calm: 1, joy: 1, sorrow: 1, hope: 1 };
+        const counts = { calm: 0, joy: 0, sorrow: 0, hope: 0 };
         entries.forEach(text => {
           Object.keys(keywords).forEach(key => {
             keywords[key].forEach(word => { if (text.includes(word)) counts[key]++; });
@@ -1145,6 +1158,11 @@ const CommunityHub = () => {
             transition={{ delay: idx * 0.1 }}
             className="premium-glass-card"
             style={{ padding: '50px 40px', textAlign: 'center', cursor: 'pointer' }}
+            onClick={() => {
+              if (m.name === 'Sea of Calm') navigate('/stats');
+              else if (m.name === 'The Void') navigate('/journal');
+              else navigate('/speak');
+            }}
           >
             <div className="card-icon-sphere" style={{ background: `radial-gradient(circle at 30% 30%, ${m.color}66, transparent)` }}>
               {m.icon}
