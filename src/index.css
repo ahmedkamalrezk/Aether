@@ -1,0 +1,325 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --night-black: #050505;
+  --silver-glow: rgba(192, 192, 192, 0.1);
+  --silver-text: #E0E0E0;
+  --silver-muted: #808080;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shine: rgba(255, 255, 255, 0.05);
+  --accent-silver: #C0C0C0;
+
+  --font-main: 'Inter', sans-serif;
+  --font-header: 'Outfit', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--night-black);
+  color: var(--silver-text);
+  font-family: var(--font-main);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-header);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--glass-shine), transparent);
+  pointer-events: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--night-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--silver-muted);
+}
+
+.silver-text-gradient {
+  background: linear-gradient(to bottom, #FFFFFF, var(--accent-silver));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dot-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(var(--glass-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.glass-button {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  color: var(--silver-text);
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-main);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.glass-button:hover {
+  background: var(--glass-shine);
+  border-color: var(--accent-silver);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.glass-button:active {
+  transform: translateY(0);
+}
+
+.silver-glow-orb {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(192, 192, 192, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
+  transform: translateZ(0);
+  /* Force GPU */
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(2deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.floating {
+  animation: float 6s ease-in-out infinite;
+}
+
+.star-hover {
+  transition: all 0.2s ease;
+  color: var(--silver-muted);
+}
+
+.star-hover:hover {
+  color: #fff;
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 5px #fff);
+}
+
+/* Premium UI Enhancements */
+.premium-glass-panel {
+  background: rgba(10, 10, 10, 0.4);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 32px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+}
+
+.premium-glass-card {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 30px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.premium-glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+}
+
+.icon-glow-container {
+  padding: 15px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-icon-sphere {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.aether-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.aether-logo-img:hover {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
+}
+
+.nav-link {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent-silver);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.premium-action-btn {
+  background: var(--glass-shine);
+  border: 1px solid var(--glass-border);
+  padding: 12px 28px;
+  border-radius: 14px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.premium-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+/* Mobile Utility Classes */
+@media (min-width: 769px) {
+  .mobile-only { display: none !important; }
+}
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+}
+
+/* Mobile Responsiveness Improvements */
+@media (max-width: 768px) {
+  .silver-text-gradient {
+    font-size: 2.5rem !important;
+    line-height: 1.1;
+  }
+
+  .glass-card {
+    border-radius: 16px;
+  }
+
+  .premium-glass-panel {
+    padding: 25px !important;
+    border-radius: 20px;
+  }
+
+  .aether-logo-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Chat modifications for mobile */
+  .chat-container {
+    height: 85vh !important;
+    max-height: 85vh !important;
+  }
+
+  .responsive-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .silver-text-gradient {
+    font-size: 2rem !important;
+  }
+  
+  .glass-button {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+  
+  .nav-container {
+    padding: 10px 5% !important;
+  }
+}
+
