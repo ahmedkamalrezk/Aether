@@ -1229,9 +1229,9 @@ const CommunityHub = () => {
 
   const moods = [
     { id: 'calm', name: 'Sea of Calm', icon: <Waves size={32} />, color: '#C0C0C0', desc: 'Quiet reflection and deep inner peace.' },
-    { id: 'void', name: 'The Void', icon: <Moon size={32} />, color: '#444', desc: 'Embracing the silence of the unknown.' },
-    { id: 'hope', name: 'Fires of Hope', icon: <Flame size={32} />, color: '#888', desc: 'Reigniting the fire of hope within.' },
-    { id: 'woods', name: 'Whispering Woods', icon: <Trees size={32} />, color: '#666', desc: 'Gentle support and collective growth.' }
+    { id: 'void', name: 'The Void', icon: <Moon size={32} />, color: '#444444', desc: 'Embracing the silence of the unknown.' },
+    { id: 'hope', name: 'Fires of Hope', icon: <Flame size={32} />, color: '#888888', desc: 'Reigniting the fire of hope within.' },
+    { id: 'woods', name: 'Whispering Woods', icon: <Trees size={32} />, color: '#666666', desc: 'Gentle support and collective growth.' }
   ];
 
   useEffect(() => {
